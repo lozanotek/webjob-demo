@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
+using System.Net.Mail;
 using Microsoft.Azure.WebJobs;
 
 namespace EmailJob
@@ -12,9 +8,28 @@ namespace EmailJob
     {
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called queue.
-        public static void ProcessQueueMessage([QueueTrigger("EmailJobQueue")] string message, TextWriter log)
+        public static void ProcessQueueMessage([QueueTrigger("emailjob")] string email, TextWriter log)
         {
-            log.WriteLine(message);
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return;
+            }
+
+            var message = new MailMessage
+            {
+                IsBodyHtml = false,
+                Subject = "[WebJob Demo] Email Signup",
+                Body = "We've received your sign up request!"
+            };
+
+            message.To.Add(email);
+
+            using (var client = new SmtpClient())
+            {
+                client.Send(message);
+            }
+
+            log.WriteLine("Sending email to {0}.", email);
         }
     }
 }

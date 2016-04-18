@@ -1,12 +1,14 @@
-﻿using System.Web.Mvc;
+﻿using System.Threading.Tasks;
+using System.Web.Mvc;
 
 namespace DemoApp.Controllers
 {
     public class SignupController : Controller
     {
         [HttpPost]
-        public ActionResult Index(string email)
+        public async Task<ActionResult> Index(string email)
         {
+            await JobHelper.SendNotification(email);
             return RedirectToAction("index", "home");
         }
     }
